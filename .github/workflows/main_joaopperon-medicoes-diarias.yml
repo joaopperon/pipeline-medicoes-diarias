@@ -1,8 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
-
-name: Build and deploy Python project to Azure Function App - joaopperon-medicoes-diarias
+name: Build and deploy Python project to Azure Function App
 
 on:
   push:
@@ -11,14 +7,14 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  PYTHON_VERSION: '3.9' # set this to the python version to use (supports 3.6, 3.7, 3.8)
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
+  PYTHON_VERSION: '3.9'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -69,15 +65,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_61BD93697FC34185989D9A26CD70E4CC }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6D32DC252FB44C5EB5677DB5BD08487D }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C07C376379184474A1E4E4CF9A25ED35 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          client-secret: ${{ secrets.AZUREAPPSERVICE_CLIENTSECRET }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
 
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
         id: deploy-to-function
         with:
-          app-name: 'joaopperon-medicoes-diarias'
+          app-name: ${{ secrets.AZURE_FUNCTION_APP_NAME }}
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           
