@@ -87,6 +87,7 @@ def main(timer: func.TimerRequest):
         place_in_queue(pontos_medicao)
 
         logging.info(f"Criação de fila de requisições para o dia {today} concluída.")
+        pass
 
     except psycopg2.Error as db_error:
         logging.error("Erro de banco de dados:")
