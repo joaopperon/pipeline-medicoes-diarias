@@ -8,7 +8,6 @@ import azure.functions as func
 from datetime import datetime
 from psycopg2.extras import DictCursor
 from azure.storage.queue import QueueClient
-from azure.identity import DefaultAzureCredential
 
 from shared_code.get_secrets import get_secret
 
@@ -57,22 +56,23 @@ def fetch_pontos_medicao():
 
 def place_in_queue(pontos_medicao: list):
     logging.info("Iniciando processo de envio de mensagens.")
+
     logging.info("Buscando variáveis de ambiente.")
-    queue_url = os.getenv("QUEUE_URL")
     queue_name = os.getenv("QUEUE_NAME")
+    queue_connection_string = os.getenv("AzureWebJobsStorage")
 
     logging.info("Estabelecendo client para fila.")
-    credential = DefaultAzureCredential()
-    queue_client = QueueClient.from_queue_url(
-        queue_url=queue_url, credential=credential
+    queue_client = QueueClient.from_connection_string(
+        conn_str=queue_connection_string, queue_name=queue_name
     )
 
     logging.info(f"Inserindo pedidos de requisição em fila {queue_name}.")
     for ponto_medicao in pontos_medicao:
-        message = dict(ponto_medicao)
-        message["timestamp"] = datetime.now(TIMEZONE).isoformat()
-
-        queue_client.send_message(message)
+        message = {
+            **dict(ponto_medicao),
+            "timestamp": datetime.now(TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        queue_client.send_message(content=message, time_to_live=12 * 3600)
 
 
 def main(timer: func.TimerRequest):
